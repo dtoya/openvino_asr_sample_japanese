@@ -1,0 +1,555 @@
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/model_zoo/data/dataset_definitions.yml venv/lib/python3.8/site-packages/openvino/model_zoo/data/dataset_definitions.yml
+--- venv_orig/lib/python3.8/site-packages/openvino/model_zoo/data/dataset_definitions.yml	2022-06-11 15:51:04.884625400 +0900
++++ venv/lib/python3.8/site-packages/openvino/model_zoo/data/dataset_definitions.yml	2022-06-11 14:36:13.634625400 +0900
+@@ -1126,6 +1126,15 @@
+     metrics:
+       - name: wer
+ 
++  - name: common_voice_ja_test
++    data_source: common_voice/ja/test
++    annotation_conversion:
++      converter: librispeech
++      data_dir: common_voice/ja/test
++    annotation: common-voice-ja-test.pickle
++    metrics:
++      - name: wer
++
+   - name: WMT_en_ru
+     annotation_conversion:
+       converter: wmt
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/README.md venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/README.md
+--- venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/README.md	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/README.md	2022-06-11 15:09:36.594625400 +0900
+@@ -0,0 +1,109 @@
++# wav2vec2-base
++
++## Use Case and High-Level Description
++
++Wav2Vec2.0-base is a model, which pre-trained to learn speech representations on unlabeled data as described in [wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations](https://arxiv.org/abs/2006.11477) paper and fine-tuned for speech recognition task with a Connectionist Temporal Classification (CTC) loss on LibriSpeech dataset containing 960 hours of audio.
++The model is composed of a multi-layer convolutional feature encoder which takes as input raw audio and outputs latent speech representations, then fed to a Transformer to build representations capturing information from the entire sequence. For base model Transformer consists of 12 transformer layers and has 768 as feature dimension.
++For details please also check [repository](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec#wav2vec-20) and [model card](https://huggingface.co/facebook/wav2vec2-base-960h).
++
++## Specification
++
++| Metric           | Value              |
++| ---------------- | ------------------ |
++| Type             | Speech recognition |
++| GFLOPs           | 26.843             |
++| MParams          | 94.3965            |
++| Source framework | PyTorch\*          |
++
++## Accuracy
++
++| Metric                       | Value |
++| ---------------------------- | ----- |
++| WER @ Librispeech test-clean | 3.39% |
++
++### Input
++
++#### Original model
++
++Normalized audio signal, name - `inputs`,  shape - `B, N`, format is `B, N`, where:
++
++- `B` - batch size
++- `N` - sequence length
++
++Model is dynamic and can working with different shapes of input.
++
++**NOTE**: Model expects 16-bit, 16 kHz, mono-channel WAVE audio as input data.
++
++#### Converted model
++
++The converted model has the same parameters as the original model.
++
++### Output
++
++#### Original model
++
++Per-token probabilities (after LogSoftmax) for every symbol in the alphabet, name - `logits`,  shape - `B, N, 32`, output data format is `B, N, C`, where:
++
++- `B` - batch size
++- `N` - number of recognized tokens
++- `C` - alphabet size
++
++`B` and `N` dimensions can take different values, because model is dynamic. Alphabet size `C` is static and equals 32.
++Model alphabet: "[pad]", "[s]", "[/s]", "[unk]", "|", "E", "T", "A", "O", "N", "I", "H", "S", "R", "D", "L", "U", "M", "W", "C", "F", "G", "Y", "P", "B", "V", "K", "'", "X", "J", "Q", "Z", where:
++
++- `[pad]` - padding token used as CTC-blank label
++- `[s]`- start of string
++- `[/s]` - end of string
++- `[unk]` - unknown symbol
++- `|` - whitespace symbol used as separator between words.
++
++#### Converted model
++
++The converted model has the same parameters as the original model.
++
++## Download a Model and Convert it into OpenVINO™ IR Format
++
++You can download models and if necessary convert them into OpenVINO™ IR format using the [Model Downloader and other automation tools](../../../tools/model_tools/README.md) as shown in the examples below.
++
++An example of using the Model Downloader:
++```
++omz_downloader --name <model_name>
++```
++
++An example of using the Model Converter:
++```
++omz_converter --name <model_name>
++```
++
++## Demo usage
++
++The model can be used in the following demos provided by the Open Model Zoo to show its capabilities:
++
++* [Speech Recognition Wav2Vec Python\* Demo](../../../demos/speech_recognition_wav2vec_demo/python/README.md)
++
++## Legal Information
++
++The original model is distributed under the following [license](https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE).
++```
++MIT License
++
++Copyright (c) Facebook, Inc. and its affiliates.
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++```
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/accuracy-check.yml venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/accuracy-check.yml
+--- venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/accuracy-check.yml	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/accuracy-check.yml	2022-06-11 15:03:51.514625400 +0900
+@@ -0,0 +1,28 @@
++models:
++  - name: wav2vec2-large-xlsr-53-japanese
++    launchers:
++      - framework: openvino
++        allow_reshape_input: true
++        adapter:
++          type: wav2vec-ja
++          hf_model_id: 'jonatasgrosman/wav2vec2-large-xlsr-53-japanese'
++
++    datasets:
++      - name: common_voice_ja_test
++        reader:
++          type: wav_reader
++          mono: True
++          to_float: True
++          float_dtype: float64
++        metrics:
++          - type: wer
++            reference: 0.90
++          - type: cer
++            reference: 0.25
++          - type: wer_jiwer
++            chunk_size: 1000
++            reference: 0.90
++#          - type: cer_jiwer
++#            chunk_size: 1000
++#            reference: 0.25
++
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.py venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.py
+--- venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.py	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.py	2022-06-11 15:02:42.934625400 +0900
+@@ -0,0 +1,18 @@
++# Copyright (c) 2022 Intel Corporation
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#      http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from transformers.models.wav2vec2 import Wav2Vec2ForCTC
++
++def create_model(model_dir):
++    return Wav2Vec2ForCTC.from_pretrained(model_dir)
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.yml venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.yml
+--- venv_orig/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.yml	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/model_zoo/models/public/wav2vec2-large-xlsr-53-japanese/model.yml	2022-06-11 15:07:52.434625400 +0900
+@@ -0,0 +1,115 @@
++# Copyright (c) 2022 Intel Corporation
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#      http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++description: >-
++  Wav2Vec2.0-large-xlsr-53-japanese is a model, which pre-trained to learn speech representations on
++  unlabeled data as described in wav2vec 2.0: A Framework for Self-Supervised Learning
++  of Speech Representations <https://arxiv.org/abs/2006.11477> paper and fine-tuned
++  for speech recognition task with a Connectionist Temporal Classification (CTC) loss
++  on LibriSpeech dataset containing 960 hours of audio. The model is composed of a
++  multi-layer convolutional feature encoder which takes as input raw audio and outputs
++  latent speech representations, then fed to a Transformer to build representations
++  capturing information from the entire sequence. For base model Transformer consists
++  of 12 transformer layers and has 768 as feature dimension. For details please also
++  check repository <https://github.com/pytorch/fairseq/tree/master/examples/wav2vec#wav2vec-20>
++  and model card <https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-japanese>.
++task_type: named_entity_recognition
++files:
++  - name: transformers-4.8.2-py3-none-any.whl
++    size: 2499371
++    checksum: 91713fbb6bf46b5a216c3336260cc03e7d2c7cbd031e810d22feeed0865f9e0f5d7a87c45f7d60669587cbc9548c30c1
++    source: https://files.pythonhosted.org/packages/fd/1a/41c644c963249fd7f3836d926afa1e3f1cc234a1c40d80c5f03ad8f6f1b2/transformers-4.8.2-py3-none-any.whl
++  - name: wav2vec2-large-xlsr-53-japanese/pytorch_model.bin
++    size: 1271531927
++    checksum: 89f1b9cb835b6cbdd02aa433c66a577739cdd9ea30c44a86ae188739e962dbb6066a9c1112ac9e81f3f0a97068f4397a
++    source: https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-japanese/resolve/main/pytorch_model.bin
++  - name: wav2vec2-large-xlsr-53-japanese/config.json
++    size: 1567 
++    checksum: 83c8522a8a189fb25739ee1a47531fd954964475d2fa1e4f3887290b5cd827a9df09afd7a399c3f57962eb9902a04aae
++    source: https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-japanese/resolve/main/config.json
++  - name: wav2vec2-large-xlsr-53-japanese/vocab.json
++    size: 29298
++    checksum: 7117d808cc42c2f53ea7d3de472d9243a562c1772c17a65f37f196efcf0cdc4e7e54370760a3d7633e364b0ad12963c3
++    source: https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-japanese/resolve/main/vocab.json
++  - name: packaging-20.9-py2.py3-none-any.whl
++    size: 40870
++    checksum: 422fac4cb009bed3eae42e9688b1712ee15dde1799c888f33c802792e925373dee046602d1d31c460d9d2af3ff6b93a1
++    source: https://files.pythonhosted.org/packages/3e/89/7ea760b4daa42653ece2380531c90f64788d979110a2ab51049d92f408af/packaging-20.9-py2.py3-none-any.whl
++postprocessing:
++  - $type: unpack_archive
++    format: zip
++    file: transformers-4.8.2-py3-none-any.whl
++  - $type: unpack_archive
++    format: zip
++    file: packaging-20.9-py2.py3-none-any.whl
++  - $type: regex_replace
++    file: transformers/__init__.py
++    pattern: 'from . import dependency_versions_check'
++    replacement: '# \g<0>'
++  - $type: regex_replace
++    file: transformers/deepspeed.py
++    pattern: 'from .dependency_versions_check import dep_version_check'
++    replacement: '# \g<0>'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: 'from tqdm.auto import tqdm'
++    replacement: '# \g<0>'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: from filelock import FileLock
++    replacement: '# \g<0>'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: from huggingface_hub import HfApi, HfFolder, Repository
++    replacement: '# \g<0>'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: return HfApi\(endpoint=HUGGINGFACE_CO_RESOLVE_ENDPOINT\)\.create_repo\(\n.*\n.*\n.*\n.*\n.*\n.*\n+.*\)
++    replacement: 'return None'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: 'repo = Repository\(repo_path_or_name, clone_from=repo_url, use_auth_token=use_auth_token\)'
++    replacement: 'repo = None'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: 'def _push_to_hub\(cls, repo\: Repository, commit_message\: Optional\[str\]
++      = None\) -> str\:'
++    replacement: 'def _push_to_hub(cls, repo, commit_message: Optional[str] = None)
++      -> str:'
++  - $type: regex_replace
++    file: transformers/file_utils.py
++    pattern: '-> Repository\:'
++    replacement: ':'
++conversion_to_onnx_args:
++  - --model-path=$dl_dir
++  - --model-path=$config_dir
++  - --model-name=create_model
++  - --import-module=model
++  - --model-param=model_dir=r"$dl_dir/wav2vec2-large-xlsr-53-japanese"
++  - --input-names=inputs
++  - --output-names=logits
++  - --input-shapes=[1,30480]
++  - --output-file=$conv_dir/wav2vec2-large-xlsr-53-japanese.onnx
++  - '--conversion-param=dynamic_axes={"inputs": {0: "batch_size", 1: "sequence_len"},
++    "logits": {0: "batch_size", 1: "sequence_len"}}'
++input_info:
++  - name: inputs
++    shape: [1, 57600]
++    layout: NS
++model_optimizer_args:
++  - --input_model=$conv_dir/wav2vec2-large-xlsr-53-japanese.onnx
++  - --output=logits
++framework: pytorch
++quantizable: true
++license: https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/__init__.py venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/__init__.py
+--- venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/__init__.py	2022-06-11 15:51:05.054625400 +0900
++++ venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/__init__.py	2022-06-11 14:36:13.634625400 +0900
+@@ -116,7 +116,10 @@
+     CTCGreedyDecoder,
+     CTCBeamSearchDecoderWithLm,
+     FastCTCBeamSearchDecoderWithLm,
+-    Wav2VecDecoder
++    Wav2VecDecoder,
++)
++from .audio_recognition_ja import (
++    Wav2VecJaDecoder
+ )
+ from .kaldi_asr_decoder import KaldiLatGenDecoder
+ from .regression import RegressionAdapter, MultiOutputRegression, KaldiFeatsRegression
+@@ -259,6 +262,7 @@
+     'FastCTCBeamSearchDecoderWithLm',
+     'KaldiLatGenDecoder',
+     'Wav2VecDecoder',
++    'Wav2VecJaDecoder',
+ 
+     'QualityAssessmentAdapter',
+ 
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/audio_recognition_ja.py venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/audio_recognition_ja.py
+--- venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/audio_recognition_ja.py	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/adapters/audio_recognition_ja.py	2022-06-11 14:36:13.634625400 +0900
+@@ -0,0 +1,68 @@
++"""
++Copyright (c) 2018-2022 Intel Corporation
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++      http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++"""
++from itertools import groupby
++
++import numpy as np
++
++from ..adapters import Adapter
++from ..config import BoolField, StringField, ListField
++from ..representation import CharacterRecognitionPrediction
++from ..utils import read_txt
++
++from transformers import Wav2Vec2Processor
++
++class Wav2VecJaDecoder(Adapter):
++    __provider__ = 'wav2vec-ja'
++
++    @classmethod
++    def parameters(cls):
++        params = super().parameters()
++        params.update({
++            'hf_model_id': StringField(optional=True, default='jonatasgrosman/wav2vec2-large-xlsr-53-japanese', description='Huggingface model ID'),
++            'alphabet': ListField(optional=True, description='supported tokens'),
++            'pad_token': StringField(optional=True, default='<pad>', description='padding token'),
++            'words_delimiter': StringField(optional=True, default='|', description='words delimiter tokens'),
++            'group_tokens': BoolField(optional=True, default=True, description='allow grouping repeated tokens'),
++            'lower_case': BoolField(optional=True, default=False, description='converts output to lower case'),
++            'cleanup_whitespaces': BoolField(optional=True, default=True, description='clean up extra white spaces')
++        })
++        return params
++
++    def configure(self):
++        self.alphabet = self.get_value_from_config('alphabet')
++        self.pad_token = self.get_value_from_config('pad_token')
++        self.words_delimiter = self.get_value_from_config('words_delimiter')
++        self.group_tokens = self.get_value_from_config('group_tokens')
++        self.lower_case = self.get_value_from_config('lower_case')
++        self.cleanup_whitespaces = self.get_value_from_config('cleanup_whitespaces')
++        self.processor = Wav2Vec2Processor.from_pretrained(self.get_value_from_config('hf_model_id'))
++
++    def process(self, raw, identifiers, frame_meta):
++        out_logits = self._extract_predictions(raw, frame_meta)
++        results = []
++        for identifier, logits in zip(identifiers, out_logits[self.output_blob]):
++            #token_ids = np.argmax(logits, -1)
++            token_ids = np.squeeze(np.argmax(logits, -1))
++            #tokens = [self.alphabet[idx] for idx in token_ids if self.alphabet[idx]]
++            tokens = self.processor.batch_decode(token_ids)
++            if self.group_tokens:
++                tokens = [token_group[0] for token_group in groupby(tokens)]
++            tokens = [t for t in tokens if t != self.pad_token]
++            res_string = ''.join([t if t != self.words_delimiter else ' ' for t in tokens]).strip()
++            if self.cleanup_whitespaces:
++                res_string = res_string.lower()
++            results.append(CharacterRecognitionPrediction(identifier, res_string))
++        return results
+\ No newline at end of file
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/__init__.py venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/__init__.py
+--- venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/__init__.py	2022-06-11 15:51:05.094625400 +0900
++++ venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/__init__.py	2022-06-11 14:36:13.634625400 +0900
+@@ -117,6 +117,7 @@
+ 
+ from .audio_processing import SISDRMetric
+ from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER, SpeechRecognitionSER
++from .speech_recognition_jiwer import SpeechRecognitionWERJiWER, SpeechRecognitionCERJiWER
+ 
+ from .score_class_comparison import ScoreClassComparisonMetric
+ from .dna_seq_accuracy import DNASequenceAccuracy
+diff -u -r -N venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/speech_recognition_jiwer.py venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/speech_recognition_jiwer.py
+--- venv_orig/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/speech_recognition_jiwer.py	1970-01-01 09:00:00.000000000 +0900
++++ venv/lib/python3.8/site-packages/openvino/tools/accuracy_checker/metrics/speech_recognition_jiwer.py	2022-06-11 14:49:43.664625400 +0900
+@@ -0,0 +1,139 @@
++"""
++Copyright (c) 2018-2022 Intel Corporation
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++      http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++"""
++
++from ..representation import (
++    CharacterRecognitionAnnotation,
++    CharacterRecognitionPrediction,
++)
++from .metric import PerImageEvaluationMetric
++from .distance import editdistance_eval
++
++import jiwer
++import jiwer.transforms as tr
++from typing import List
++import gc
++from ..config import NumberField
++from ..logging import debug 
++
++class SpeechRecognitionWERJiWER(PerImageEvaluationMetric):
++    __provider__ = 'wer_jiwer'
++    annotation_types = (CharacterRecognitionAnnotation,)
++    prediction_types = (CharacterRecognitionPrediction,)
++
++    @classmethod
++    def parameters(cls):
++        parameters = super().parameters()
++        parameters.update({
++            'chunk_size': NumberField(
++                value_type=int, optional=True, default=None,
++                description="Maximum number of characters to calculate metrics. If chunk_site is set,"
++                            "the sentence is divided by the chunk size and the metrics are calculated for each chunk.")
++        })
++        return parameters
++
++    def configure(self):
++        self.chunk_size = self.get_value_from_config('chunk_size')
++        self.H, self.S, self.D, self.I = 0, 0, 0, 0
++
++    def update(self, annotation, prediction):
++        debug('wer: annotation: {}'.format(annotation.label.split()))
++        debug('wer: prediction: {}'.format(prediction.label.split()))
++        if self.chunk_size is None: return jiwer.wer(annotation.label.split(), prediction.label.split())
++        start = 0
++        end = self.chunk_size
++        while start < len(annotation.label.split()):
++            chunk_metrics = jiwer.compute_measures(annotation.label.split()[start:end], prediction.label.split()[start:end])
++            self.H = self.H + chunk_metrics["hits"]
++            self.S = self.S + chunk_metrics["substitutions"]
++            self.D = self.D + chunk_metrics["deletions"]
++            self.I = self.I + chunk_metrics["insertions"]
++            start += self.chunk_size
++            end += self.chunk_size       
++        debug('wer: H= {} S= {} D= {} I = {}'.format(self.H, self.S, self.D, self.I))
++        return float(self.S + self.D + self.I) / float(self.H + self.S + self.D)
++
++    def evaluate(self, annotations, predictions):
++        return  float(self.S + self.D + self.I) / float(self.H + self.S + self.D)
++
++    def reset(self):
++        self.H, self.S, self.D, self.I = 0, 0, 0, 0
++
++    @classmethod
++    def get_common_meta(cls):
++        meta = super().get_common_meta()
++        meta['target'] = 'higher-worse'
++        return meta
++
++
++class SpeechRecognitionCERJiWER(PerImageEvaluationMetric):
++    __provider__ = 'cer_jiwer'
++    annotation_types = (CharacterRecognitionAnnotation,)
++    prediction_types = (CharacterRecognitionPrediction,)
++
++    @classmethod
++    def parameters(cls):
++        parameters = super().parameters()
++        parameters.update({
++            'chunk_size': NumberField(
++                value_type=int, optional=True, default=None,
++                description="Maximum number of characters to calculate metrics. If chunk_site is set,"
++                            "the sentence is divided by the chunk size and the metrics are calculated for each chunk.")
++        })
++        return parameters
++
++    def configure(self):
++        self.chunk_size = self.get_value_from_config('chunk_size')
++        self.H, self.S, self.D, self.I = 0, 0, 0, 0
++
++    def update(self, annotation, prediction):
++        debug('cer: annotation: {}'.format(annotation.label))
++        debug('cer: prediction: {}'.format(prediction.label))
++        if self.chunk_size is None:
++            preds = [char for seq in prediction.label for char in list(seq)]
++            refs = [char for seq in annotation.label for char in list(seq)]
++            debug('preds: {} refs: {}'.format(preds, refs))
++            return jiwer.wer(refs, preds)
++        start = 0
++        end = self.chunk_size
++        while start < len(annotation.label):
++            preds = [char for seq in prediction.label[start:end] for char in list(seq)]
++            refs = [char for seq in annotation.label[start:end] for char in list(seq)]
++            chunk_metrics = jiwer.compute_measures(refs, preds)
++            self.H = self.H + chunk_metrics["hits"]
++            self.S = self.S + chunk_metrics["substitutions"]
++            self.D = self.D + chunk_metrics["deletions"]
++            self.I = self.I + chunk_metrics["insertions"]
++            start += self.chunk_size
++            end += self.chunk_size
++            del preds
++            del refs
++            del chunk_metrics
++            gc.collect()
++        debug('wer: H= {} S= {} D= {} I = {}'.format(self.H, self.S, self.D, self.I))
++        return float(self.S + self.D + self.I) / float(self.H + self.S + self.D)
++
++    def evaluate(self, annotations, predictions):
++        return float(self.S + self.D + self.I) / float(self.H + self.S + self.D)
++
++    def reset(self):
++        self.H, self.S, self.D, self.I = 0, 0, 0, 0
++
++    @classmethod
++    def get_common_meta(cls):
++        meta = super().get_common_meta()
++        meta['target'] = 'higher-worse'
++        return meta
++

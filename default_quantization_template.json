@@ -1,0 +1,35 @@
+{
+    /* Model parameters */
+
+    "model": {
+        "model_name": "wav2vec2-large-xlsr-53-japanese", // Model name
+        "model": "public/wav2vec2-large-xlsr-53-japanese/FP32/wav2vec2-large-xlsr-53-japanese.xml", // Path to model (.xml format)
+        "weights": "public/wav2vec2-large-xlsr-53-japanese/FP32/wav2vec2-large-xlsr-53-japanese.bin" // Path to weights (.bin format)
+    },
+
+    /* Parameters of the engine used for model inference */
+
+    "engine": {
+        "config": "accuracy-check_wav2vec2-large-xlsr-53-japanese.yml" // Path to Accuracy Checker config
+    },
+
+    /* Optimization hyperparameters */
+
+    "compression": {
+        "target_device": "ANY", // Target device, the specificity of which will be taken
+                                // into account during optimization
+        "algorithms": [
+            {
+                "name": "DefaultQuantization", // Optimization algorithm name
+                "params": {
+                    "preset": "performance", // Preset [performance, mixed, accuracy] which control the quantization
+                                             // mode (symmetric, mixed (weights symmetric and activations asymmetric)
+                                             // and fully asymmetric respectively)
+
+                    "stat_subset_size": 300  // Size of subset to calculate activations statistics that can be used
+                                             // for quantization parameters calculation
+                }
+            }
+        ]
+    }
+}

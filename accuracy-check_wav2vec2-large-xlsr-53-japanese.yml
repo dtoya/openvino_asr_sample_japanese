@@ -1,0 +1,28 @@
+models:
+  - name: wav2vec2-large-xlsr-53-japanese
+    launchers:
+      - framework: openvino
+        allow_reshape_input: true
+        adapter:
+          type: wav2vec-ja 
+          hf_model_id: 'jonatasgrosman/wav2vec2-large-xlsr-53-japanese'
+
+    datasets:
+      - name: common_voice_ja_test 
+        reader:
+          type: wav_reader
+          mono: True
+          to_float: True
+          float_dtype: float64
+        metrics:
+          - type: wer
+            reference: 0.90
+          - type: cer
+            reference: 0.25
+          - type: wer_jiwer
+            chunk_size: 1000
+            reference: 0.90
+#          - type: cer_jiwer
+#            chunk_size: 1000
+#            reference: 0.25
+

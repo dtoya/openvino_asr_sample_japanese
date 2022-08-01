@@ -1,0 +1,7 @@
+openvino-dev[pytorch] 
+protobuf==3.20 # for error in omz_converter
+transformers 
+librosa  
+datasets # for download/convert dataset
+jiwer # for accuracy checker
+
