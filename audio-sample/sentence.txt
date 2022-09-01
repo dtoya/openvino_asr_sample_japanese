@@ -1,0 +1,10 @@
+
+common_voice_test_0001: 木村さんに電話を貸してもらいました。
+common_voice_test_0002: きのうは八時間寝ました。
+common_voice_test_0003: 田中さんの右に山田さんがいます。
+common_voice_train_0001: 午後は、溜った書類に目を通して返す。
+common_voice_train_0002: みんなが教室で先生を待っています。
+common_voice_train_0003: 小さい雪は早く、大きい雪は、ふわふわと落ちてくる。
+common_voice_train_0004: 夏が終わると、秋が来ます。
+common_voice_train_0005: ちゃわんでごはんを食べます。
+common_voice_train_0006: ヴェーザー自転車道やミューレンルートに従ったサイクリングツアーはペータースハーゲンを経由する

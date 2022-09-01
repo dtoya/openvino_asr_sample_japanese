@@ -17,19 +17,31 @@ input_tensor_name = model.inputs[0].get_any_name()
 output_tensor = compiled_model.outputs[0]
 
 speech_array, sampling_rate = librosa.load('test.wav', sr=16_000)
+input_shape = model.input(0).partial_shape
+model_input_len = len(input_shape[1])
 
-inputs = processor(speech_array, sampling_rate=16_000, return_tensors="pt", padding=True)
-input_data = {input_tensor_name: inputs.input_values}
+head = 0
+speech_array_len = speech_array.size
+while head < speech_array_len:
+    if speech_array_len - head < model_input_len: 
+        pad = model_input_len - ( speech_array_len - head ) 
+        input_array = np.pad(speech_array[head:], [ (0,pad)])
+    else:
+        input_array = speech_array[head:head+model_input_len]
+    head += model_input_len
+    inputs = processor(input_array, sampling_rate=16_000, return_tensors="pt", padding=True)
 
-with torch.no_grad():
-    #logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
-    logits = infer_request.infer(input_data)[output_tensor]
+    input_data = {input_tensor_name: inputs.input_values}
 
-#predicted_ids = torch.argmax(logits, dim=-1)
-predicted_ids = np.squeeze(np.argmax(logits, -1))
-predicted_token = processor.batch_decode(predicted_ids)
-pad_token = '<pad>'
-predicted_token = [t for t in predicted_token if t != pad_token]
-sentence = ''.join(predicted_token)
-print("Prediction: ",sentence)
+    with torch.no_grad():
+        #logits = model(inputs.input_values, attention_mask=inputs.attention_mask).logits
+        logits = infer_request.infer(input_data)[output_tensor]
+
+    #predicted_ids = torch.argmax(logits, dim=-1)
+    predicted_ids = np.squeeze(np.argmax(logits, -1))
+    predicted_token = processor.batch_decode(predicted_ids)
+    pad_token = '<pad>'
+    predicted_token = [t for t in predicted_token if t != pad_token]
+    sentence = ''.join(predicted_token)
+    print(sentence)
 
